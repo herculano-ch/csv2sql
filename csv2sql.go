@@ -1,24 +1,3 @@
-/*
-
-   csv2sql - conversion program to convert a csv file to sql format
-   		to allow easy checking / validation, and for import into a SQLite3
-   		database using the SQLite  '.read' command
-
-	author: simon rowe <simon@wiremoons.com>
-	license: open-source released under "New BSD License"
-
-   created: 16 Apr 2014 - initial outline code written
-   updated: 17 Apr 2014 - add flags and output file handling
-   updated: 27 Apr 2014 - wrap in double quotes instead of single
-   updated: 28 Apr 2014 - add flush io file buffer to fix SQL missing EOF
-   updated: 19 Jul 2014 - add more help text, tidy up comments and code
-   updated: 06 Aug 2014 - enabled the -k flag to alter the table header characters
-   updated: 28 Sep 2014 -  changed default output when run with no params, add -h
-                                   to display the help info and also still call flags.Usage()
-   updated: 09 Dec 2014 - minor tidy up and first 'release' provided on GitHub
-   updated: 27 Aug 2016 - table name and csv file help output minior changes. Minor cosmetic stuff. Version 1.1
-
-*/
 package main
 
 import (
@@ -64,9 +43,7 @@ func init() {
 	flag.BoolVar(&helpMe, "h", false, "\tUSE: '-h' to provide more detailed help on using this program")
 }
 
-//
-//  FUNCTION: create a string to be used as the filename for the output SQL data file - return it
-//
+// SQLFileName to create filename
 func SQLFileName() (filename string) {
 	// include the name of the csv file from command line (ie csvFileName)
 	// remove any path etc
@@ -84,7 +61,7 @@ func SQLFileName() (filename string) {
 	//}
 	//fileDate := fileDate.String()
 	//fmt.Printf("\n%s\n", fileDate)
-	sqlOutFile := "SQL-" + justFileName + ".sql"
+	sqlOutFile := "sql_output_" + justFileName + ".sql"
 	return sqlOutFile
 }
 
@@ -97,82 +74,12 @@ func printBanner() {
 	// add the help and about text to the variable 'about' in the form shown below
 	// as a block of text. This will displayed to the screen later.
 	about := `
-ABOUT CSV2SQL
-¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-    CVS2SQL is a small simple program specifically designed to quickly convert a 
-    comma separated value (CSV) file into simple structured query language (SQL) 
-    statements, which can then be used as an import source for an SQLite database.
 
-    Key features include:
-    
-       * The CSV file is integrity checked while being converted to SQL - to 
-       ensure it has a consistent number of column values. In other words the 
-       number of commas in the header (first line) of the CSV file, are the same
-       throughout the rest of the file too.
-
-       * The first line of your CSV file will be designated as the header line -
-       and therefore will become the column names in your subsequent SQLite 
-       database table.
-
-       * Any spaces or the following characters | - + @ # / \ : ( ) '
-       found in the header line of you CSV file, will be replaced when they are
-       used as the subsequent column names for your new SQLite table. These 
-       characters will be replaced with the underscore character (ie '_'). These
-       changes only apply to the header line, and are carried out to avoid SQL 
-       syntax import issues, and make any future SQL statements referencing these 
-       column names easier to construct. This default feature can be disabled by
-       using the command line parameter ' -k=true ' if you wish.
-
-       * You choose and specify the table name the CSV file contents will be 
-       imported into in your SQLite database when you run the program.
-
-       * The output file is a plain text file. It just contains the SQL commands 
-       that are used by SQLite to create and then insert all your data into your
-       specified new table. The output file can therefore be edited (if you wish) 
-       to adapt it further - perhaps to suit you own needs.
-    
-FURTHER BACKGROUND
-¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-    The CSV file specified will be read and then split up on the comma character,
-    on a per line basis. The first line of the CSV file is used as the column names
-    in your new SQLite table. The eventual contents in your new database table will 
-    therefore be a table row for each line read from the CSV file.
-
-    The output filename (ie <sql-filename.sql>) will be created 
-    automatically for you when you run the program. Note that it will also 
-    overwrite / replace any existing file with the same name! The filename it
-    will create will be based on your input filename, prefixed with 'SQL' and 
-    the file extension set to '.sql'. So 'test-123.csv' -> 'SQL-test-123.sql'. 
-
-    The newly generated output file will contain the SQL statements to allow
-    the contents of your CSV file to be imported into a new SQLite database 
-    table. The table name to be used must be provided on the command line
-    as ' -t tablename ' - where tablename is the name of the SQLite table to 
-    hold your CSV file data. 
-
-HOW TO USE THE OUTPUT
-¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-    To import the table and its contents, open your SQLite database with the 
-    sqlite3 program, and use to command:  .read <sql-filename.sql>
-
-FURTHER INFORMATION
-¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-    Latest version is kept on GitHub here: https://github.com/wiremoons
-    The program is written in Go - more information here: http://www.golang.org/
-    More information on SQLite can be found here: http://www.sqlite.org/
-    The program was written by Simon Rowe, and is licensed under the "New BSD License"
-
-COMMAND LINE USAGE
+	COMMAND LINE USAGE
 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯`
 	// now display the information on screen
 	fmt.Println("\n\t\t\tcsv2sql conversion program\n\t\t\t\tVersion:", appversion, "\n", about)
 }
-
-//////////////////////////////////////////////////////////////////////////////
-//
-//                     MAIN STARTS HERE
-//
-//////////////////////////////////////////////////////////////////////////////
 
 func main() {
 	//-------------------------------------------------------------------------
